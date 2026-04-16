@@ -10,46 +10,63 @@ interface Props {
 
 export default function InvoicePreview({ data, result }: Props) {
   return (
-    <div style={{ marginTop: 30 }}>
-      <h3>Summary</h3>
+    <div className="preview-content">
+      <h3>Invoice Summary</h3>
 
-      <table style={{ width: "100%", borderCollapse: "collapse" }}>
+      <table className="item-table">
+        <thead>
+          <tr>
+            <th>Item</th>
+            <th>Qty</th>
+            <th>Price</th>
+            <th>Amount</th>
+          </tr>
+        </thead>
+        <tbody>
+          {data.items.map((item, index) => {
+            const fallbackTotal = item.quantity * item.price;
+            const itemTotal = Number.isFinite(result.itemTotals[index])
+              ? result.itemTotals[index]
+              : fallbackTotal;
+
+            return (
+              <tr key={item.id}>
+                <td>{item.itemName || `Item ${index + 1}`}</td>
+                <td>{item.quantity}</td>
+                <td>{formatINR(item.price)}</td>
+                <td>{formatINR(itemTotal)}</td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+
+      <table className="summary-table">
         <tbody>
           <tr>
-            <td>Base Amount</td>
-            <td style={{ textAlign: "right" }}>
-              {formatINR(result.baseAmount)}
-            </td>
+            <td>Subtotal</td>
+            <td>{formatINR(result.subtotal)}</td>
           </tr>
           <tr>
             <td>Discount</td>
-            <td style={{ textAlign: "right" }}>
-              {formatINR(result.discountAmount)}
-            </td>
+            <td>- {formatINR(result.discountAmount)}</td>
           </tr>
           <tr>
             <td>Taxable Amount</td>
-            <td style={{ textAlign: "right" }}>
-              {formatINR(result.taxableAmount)}
-            </td>
+            <td>{formatINR(result.taxableAmount)}</td>
           </tr>
           <tr>
-            <td>GST</td>
-            <td style={{ textAlign: "right" }}>
-              {formatINR(result.gstAmount)}
-            </td>
+            <td>GST ({data.gstPercent}%)</td>
+            <td>{formatINR(result.gstAmount)}</td>
           </tr>
-          <tr>
-            <td><strong>Total</strong></td>
-            <td style={{ textAlign: "right" }}>
-              <strong>{formatINR(result.finalAmount)}</strong>
-            </td>
+          <tr className="total-row">
+            <td>Total</td>
+            <td>{formatINR(result.finalAmount)}</td>
           </tr>
         </tbody>
       </table>
 
-      {/* Guaranteed PDF Download */}
-      <div style={{ marginTop: 20 }}>
+      <div className="pdf-download">
         <BlobProvider
           document={<InvoicePDF data={data} result={result} />}
         >
@@ -60,7 +77,7 @@ export default function InvoicePreview({ data, result }: Props) {
               <a
                 href={url!}
                 download="invoice.pdf"
-                style={{ fontWeight: "bold" }}
+                className="btn"
               >
                 Download Invoice PDF
               </a>

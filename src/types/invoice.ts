@@ -1,15 +1,21 @@
-export interface InvoiceInput {
+export interface InvoiceItem {
+  id: string;
   itemName: string;
   quantity: number;
   price: number;
+}
+
+export interface InvoiceInput {
+  items: InvoiceItem[];
   gstPercent: number;
   discountPercent?: number;
 }
 
 export interface InvoiceResult {
-  baseAmount: number;
+  subtotal: number;
   discountAmount: number;
   taxableAmount: number;
   gstAmount: number;
   finalAmount: number;
+  itemTotals: number[];
 }
